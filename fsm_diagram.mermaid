@@ -1,0 +1,40 @@
+```mermaid
+%%{init: {'layout': 'elk'}}%%
+stateDiagram-v2
+    classDef default fill:#f9f9f9,stroke:#333,stroke-width:2px;
+    
+    [*] --> LedOff
+
+    state LedOff {
+        direction TB
+        note right of LedOff : Entry: LED Low
+    }
+
+    state LedOn {
+        direction TB
+        note right of LedOn : Entry: LED High
+Entry: Trigger ADC
+    }
+
+    state HighValueWait {
+        direction TB
+        note right of HighValueWait : Entry: LED Low
+Entry: wait_ticks = 0
+    }
+
+    %% Transições
+    LedOff --> LedOn : TimerTick
+
+    LedOn --> LedOff : TimerTick
+    LedOn --> HighValueWait : AdcResult(val)
+[val > 70]
+
+    HighValueWait --> LedOff : TimerTick
+[wait_ticks >= 10 && last_adc <= 70]
+    
+    %% Self-Transitions (Lógica Interna Relevante)
+    HighValueWait --> HighValueWait : TimerTick
+[wait_ticks++, Trigger ADC]
+    HighValueWait --> HighValueWait : AdcResult(val)
+[Update last_adc]
+```
