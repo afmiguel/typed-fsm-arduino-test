@@ -1,21 +1,25 @@
 stateDiagram-v2
     [*] --> LedOff
 
-    state LedOff
-    note right of LedOff : Entry: LED Low
-
-    state LedOn
-    note right of LedOn : Entry: LED High, Trigger ADC
-
-    state HighValueWait
-    note right of HighValueWait : Entry: LED Low, wait_ticks = 0
+    note right of LedOff
+        Entry: LED Low
+    end note
 
     LedOff --> LedOn : TimerTick
 
-    LedOn --> LedOff : TimerTick
-    LedOn --> HighValueWait : AdcResult(val) [val > 70]
+    note right of LedOn
+        Entry: LED High
+        Entry: Trigger ADC
+    end note
 
-    HighValueWait --> LedOff : TimerTick [wait_ticks >= 10 && last_adc <= 70]
-    
-    HighValueWait --> HighValueWait : TimerTick [wait_ticks++, Trigger ADC]
-    HighValueWait --> HighValueWait : AdcResult(val) [Update last_adc]
+    LedOn --> LedOff : TimerTick
+    LedOn --> HighValueWait : AdcResult(val) > 70
+
+    note right of HighValueWait
+        Entry: LED Low
+        Entry: wait_ticks = 0
+    end note
+
+    HighValueWait --> LedOff : TimerTick (Timeout & Safe)
+    HighValueWait --> HighValueWait : TimerTick (Inc wait & Trigger)
+    HighValueWait --> HighValueWait : AdcResult (Update val)
