@@ -1,0 +1,47 @@
+[package]
+name = "typed-fsm-arduino-test"
+version = "0.1.0"
+authors = ["Afonso Miguel <afonso.miguel@pucpr.br>"]
+edition = "2021"
+license = "MIT OR Apache-2.0"
+
+[[bin]]
+name = "typed-fsm-arduino-test"
+test = false
+bench = false
+
+[dependencies]
+panic-halt = "0.2.0"
+ufmt = "0.2.0"
+nb = "1.1.0"
+embedded-hal = "1.0"
+
+# Dependências da Macro
+paste = "1.0"
+heapless = "0.8"
+critical-section = "1.1"
+portable-atomic = { version = "1.11", default-features = false, features = ["critical-section"] }
+
+avr-device = "0.8.0"
+
+[dependencies.arduino-hal]
+git = "https://github.com/rahix/avr-hal"
+rev = "0f7fa4d01755f1985d95ed2015d5464a29154b05"
+features = ["arduino-uno"]
+
+[dependencies.typed-fsm]
+git = "https://github.com/afmiguel/typed-fsm"
+branch = "feature/avr-concurrent-refactor"
+features = ["concurrent"]
+
+[profile.dev]
+panic = "abort"
+lto = true
+opt-level = "s"
+
+[profile.release]
+panic = "abort"
+codegen-units = 1
+debug = true
+lto = true
+opt-level = "s"
