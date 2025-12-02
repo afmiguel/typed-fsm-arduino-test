@@ -291,6 +291,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "heapless"
+version = "0.9.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2af2455f757db2b292a9b1768c4b70186d443bcb3b316252d6b540aec1cd89ed"
+dependencies = [
+ "hash32",
+ "stable_deref_trait",
+]
+
+[[package]]
 name = "icu_collections"
 version = "2.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -467,9 +477,9 @@ checksum = "42f5e15c9953c5e4ccceeb2e7382a716482c34515315f7b03532b8b4e8393d2d"
 
 [[package]]
 name = "panic-halt"
-version = "0.2.0"
+version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "de96540e0ebde571dc55c73d60ef407c653844e6f9a1e2fdbd40c07b9252d812"
+checksum = "a513e167849a384b7f9b746e517604398518590a9142f4846a32e3c2a4de7b11"
 
 [[package]]
 name = "paste"
@@ -844,11 +854,11 @@ dependencies = [
 
 [[package]]
 name = "typed-fsm"
-version = "0.4.4"
-source = "git+https://github.com/afmiguel/typed-fsm?branch=feature%2Favr-concurrent-refactor#7e96b590b0b5b546ca72d58598f90a2cbf1a187b"
+version = "0.4.6"
+source = "git+https://github.com/afmiguel/typed-fsm#cc2d0d721ea6b22e0cebae330b123911056a45e8"
 dependencies = [
  "critical-section",
- "heapless",
+ "heapless 0.8.0",
  "paste",
  "portable-atomic",
 ]
@@ -861,7 +871,7 @@ dependencies = [
  "avr-device",
  "critical-section",
  "embedded-hal 1.0.0",
- "heapless",
+ "heapless 0.9.2",
  "nb 1.1.0",
  "panic-halt",
  "paste",
