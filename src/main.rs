@@ -1,3 +1,14 @@
+//! SPDX-License-Identifier: MIT OR Apache-2.0
+//!
+//! # GPIO 'Blinky' with ADC Interrupt and Serial Output Example
+//!
+//! This application demonstrates a professional embedded Rust architecture using:
+//! - **Hardware Module:** Clean abstraction for HAL setup (`hardware.rs`).
+//! - **FSM:** Typed state machine for application logic (`blinky_fsm.rs`).
+//! - **Unified State:** Shared global state (`AppState`) protected by a Mutex.
+//!
+//! Target: Arduino Uno / Nano (ATmega328p).
+
 #![no_std]
 #![no_main]
 #![feature(abi_avr_interrupt)]
@@ -16,17 +27,22 @@ use blinky_fsm::{AppState, BlinkyContext, BlinkyEvent, BlinkyFsm};
 mod hardware;
 
 // --- Shared State ---
-// Improvement: Unified global state to avoid double locking
+
+// Global Application State (Mutex protected for ISR access).
+// Holds both the FSM and its Context.
 static GLOBAL_STATE: Mutex<RefCell<Option<AppState>>> = Mutex::new(RefCell::new(None));
 
 // --- Interrupt Handlers ---
+
+// ADC Interrupt Service Routine.
+// Reads the ADC value and dispatches it to the global FSM.
 #[avr_device::interrupt(atmega328p)]
 fn ADC() {
     // Safe access to peripheral in ISR
     let adc_ptr = unsafe { &*arduino_hal::pac::ADC::PTR };
     let value = adc_ptr.adc().read().bits();
 
-    // Dispatch AdcResult Event directly to global FSM using Critical Section
+    // Dispatch the AdcResult event to the global FSM via the Critical Section
     critical_section::with(|cs| {
         if let Some(state) = GLOBAL_STATE.borrow_ref_mut(cs).as_mut() {
             state.fsm.dispatch(&mut state.ctx, &BlinkyEvent::AdcResult(value));
@@ -35,9 +51,11 @@ fn ADC() {
 }
 
 // --- Main ---
+
+/// Entry point.
 #[arduino_hal::entry]
 fn main() -> ! {
-    // 1. Initialize Hardware Stack (Tuple destructuring - Improvement 2)
+    // 1. Initialize Hardware Layer
     let (led_pin, adc, mut serial) = hardware::init();
 
     // 2. Initialize Application State (FSM)
@@ -49,10 +67,10 @@ fn main() -> ! {
     };
     let mut fsm = BlinkyFsm::LedOff;
     
-    // Initialize FSM with Context (entry actions run here)
+    // Initialize the Finite State Machine (executes entry actions for the initial state)
     fsm.init(&mut ctx);
 
-    // 3. Publish to Unified Global State (Improvement 1 & 3)
+    // 3. Publish the initial state to the global unified resource
     critical_section::with(|cs| {
         GLOBAL_STATE.borrow_ref_mut(cs).replace(AppState { fsm, ctx });
     });
@@ -64,6 +82,7 @@ fn main() -> ! {
 
     // 4. Main Application Loop
     loop {
+        // Periodic Task: Timer Tick (every 200ms)
         arduino_hal::delay_ms(200);
 
         let mut current_state_str = "Unknown";
